@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const submitbtn = document.getElementById('submitbtn');
     const result = document.getElementById('result');
     const result_span = document.getElementById('result_span');
+    const error = document.getElementById('error');
     const today_question = document.getElementById('today_question');
     const day_div = document.getElementById('day_div');
     const topic_div = document.getElementById('topic_div');
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
         greeting.textContent = `Hi, ${storedUsername}!`;
         document.body.insertBefore(greeting, result);
         document.body.insertBefore(backButton, result);
-        fetchCount(storedUsername);
+        updateCount(storedUsername);
     } else {
         result.innerHTML = 'See your completed question by entering username.';
     }
@@ -46,47 +47,31 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.insertBefore(greeting, result);
             document.body.insertBefore(backButton, result);
 
-            // Make a POST request to the /username endpoint
-            try {
-                const response = await fetch('https://leetcode-backend-v2n3.onrender.com/username', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    result_span.innerHTML = `${data.count}`;
-                    result.insertAdjacentHTML('afterbegin', ''); 
-                } else {
-                    result.innerHTML = 'An error occurred while processing the request.';
-                }
-            } catch (error) {
-                console.error('Error in submitting username:', error);
-                result.innerHTML = 'An error occurred while processing the request.';
-            }
+            await updateCount(username);
         }
     });
 
-
-    async function fetchCount(username) {
+    async function updateCount(username) {
         try {
-            const response = await fetch(`https://leetcode-backend-v2n3.onrender.com/count/${username}`);
+            const response = await fetch('https://leetcode-backend-v2n3.onrender.com/username', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
+            });
+
             if (response.ok) {
                 const data = await response.json();
                 result_span.innerHTML = `${data.count}`;
-                result.insertAdjacentHTML('afterbegin', ''); 
             } else {
-                result.innerHTML = 'An error occurred while processing the request.';
+                error.innerHTML = 'An error occurred while processing the request.';
             }
         } catch (error) {
-            console.error('Error in fetching count:', error);
-            result.innerHTML = 'An error occurred while processing the request.';
+            console.error('Error in updating count:', error);
+            error.innerHTML = 'An error occurred while processing the request.';
         }
     }
-
 
     // fetch recently added question added to leetcode post from backend
     async function fetchJsonObject() {
